@@ -11,7 +11,7 @@ server = "komodo-periphery"
 run_directory = "/opt/komodo/stacks/demo-nginx"
 
 repo = "mrnim94/komodo-gitops-demo"
-branch = "main"
+branch = "master"
 
 
 git_provider = "github.com"
