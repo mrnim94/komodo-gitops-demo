@@ -1,0 +1,20 @@
+[[stack]]
+name = "demo-nginx"
+description = "Nginx deployed from GitHub with Komodo Resource Sync"
+tags = ["demo", "gitops"]
+
+
+deploy = true
+
+[stack.config]
+server = "komodo-periphery"
+
+
+repo = "mrnim94/komodo-gitops-demo"
+branch = "main"
+
+
+git_provider = "github.com"
+git_account = "mrnim94"
+
+file_paths = ["nginx-demo/compose.yaml"]

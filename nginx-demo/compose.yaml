@@ -1,0 +1,10 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: komodo-demo-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    labels:
+      app.kubernetes.io/managed-by: komodo
+      demo: gitops
