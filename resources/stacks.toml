@@ -8,7 +8,8 @@ deploy = true
 
 [stack.config]
 server = "komodo-periphery"
-run_directory = "/opt/komodo/stacks/demo-nginx"
+# Leave empty: Komodo Periphery clones this stack into its managed stack directory.
+run_directory = ""
 
 repo = "mrnim94/komodo-gitops-demo"
 branch = "master"
