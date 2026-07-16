@@ -8,7 +8,7 @@ deploy = true
 
 [stack.config]
 server = "komodo-periphery"
-
+run_directory = "/etc/komodo/stacks/demo-nginx"
 
 repo = "mrnim94/komodo-gitops-demo"
 branch = "main"
