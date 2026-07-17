@@ -1,30 +1,24 @@
+# Use a Repo when you need to clone source code and run arbitrary commands.
+# This resource does not manage the nginx-demo Compose application.
 [[repo]]
 name = "komodo-gitops-demo-script"
-description = "Clone demo repository and run deployment script on Periphery"
+description = "Run repository automation after clone or pull"
 tags = ["gitops", "demo"]
 
 [repo.config]
-# Exact name of the Server resource in Komodo
 server = "komodo-periphery"
-
-# For a public GitHub repo, the git provider/account may not be required.
-# For a private repo, configure the provider/account in Komodo or periphery.config.toml.
 git_provider = "github.com"
-git_account = "mrnim94"
-
 repo = "mrnim94/komodo-gitops-demo"
 branch = "master"
 
-# Run once immediately after the repo is cloned for the first time
+# Run once after the initial clone.
 on_clone.path = "."
 on_clone.command = """
-chmod +x scripts/deploy.sh
-./scripts/deploy.sh
+bash scripts/deploy.sh
 """
 
-# Run after each repo pull
+# Run again whenever Komodo pulls new commits.
 on_pull.path = "."
 on_pull.command = """
-chmod +x scripts/deploy.sh
-./scripts/deploy.sh
+bash scripts/deploy.sh
 """

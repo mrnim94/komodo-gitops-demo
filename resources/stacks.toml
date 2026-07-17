@@ -1,21 +1,14 @@
+# Use a Stack when the end result is a Docker Compose application.
+# Komodo clones the repository, reads the compose file, and manages its lifecycle.
 [[stack]]
 name = "demo-nginx"
-description = "Nginx deployed from GitHub with Komodo Resource Sync"
+description = "Nginx Docker Compose application managed by Komodo"
 tags = ["demo", "gitops"]
-
-
 deploy = true
 
 [stack.config]
 server = "komodo-periphery"
-# Leave empty: Komodo Periphery clones this stack into its managed stack directory.
-run_directory = ""
-
 repo = "mrnim94/komodo-gitops-demo"
 branch = "master"
-
-
 git_provider = "github.com"
-git_account = "mrnim94"
-
 file_paths = ["nginx-demo/compose.yaml"]

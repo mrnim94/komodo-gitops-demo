@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-echo "Deploy started: $(date -Is)"
-echo "Working directory: $(pwd)"
+echo "Automation started: $(date -Is)"
+echo "Repository directory: $(pwd)"
 
-# Ví dụ:
-# docker compose -f compose.yaml up -d --remove-orphans
+# Put non-Compose automation here. For example:
 # npm ci
 # npm run build
+# ./scripts/migrate-database.sh
+# ./scripts/reload-service.sh
+#
+# Docker Compose deployment belongs in resources/stacks.toml so Komodo can
+# track status, logs, updates, and lifecycle actions for the application.
 
-echo "Deploy completed"
+echo "Automation completed: $(date -Is)"
