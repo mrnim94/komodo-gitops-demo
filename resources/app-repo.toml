@@ -1,5 +1,5 @@
 [[repo]]
-name = "komodo-gitops-demo-scripts"
+name = "komodo-gitops-demo"
 description = "Clone demo repository and run deployment script on Periphery"
 tags = ["gitops", "demo"]
 
