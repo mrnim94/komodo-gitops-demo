@@ -1,0 +1,30 @@
+[[repo]]
+name = "komodo-gitops-demo"
+description = "Clone demo repository and run deployment script on Periphery"
+tags = ["gitops", "demo"]
+
+[repo.config]
+# Exact name of the Server resource in Komodo
+server_id = "komodo-periphery"
+
+# For a public GitHub repo, the git provider/account may not be required.
+# For a private repo, configure the provider/account in Komodo or periphery.config.toml.
+git_provider = "github.com"
+git_account = "mrnim94"
+
+repo = "mrnim94/komodo-gitops-demo"
+branch = "main"
+
+# Run once immediately after the repo is cloned for the first time
+on_clone.path = "."
+on_clone.command = """
+chmod +x scripts/deploy.sh
+./scripts/deploy.sh
+"""
+
+# Run after each repo pull
+on_pull.path = "."
+on_pull.command = """
+chmod +x scripts/deploy.sh
+./scripts/deploy.sh
+"""
