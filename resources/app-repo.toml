@@ -13,7 +13,7 @@ git_provider = "github.com"
 git_account = "mrnim94"
 
 repo = "mrnim94/komodo-gitops-demo"
-branch = "main"
+branch = "master"
 
 # Run once immediately after the repo is cloned for the first time
 on_clone.path = "."
