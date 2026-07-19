@@ -50,7 +50,7 @@ apt-get update
 systemctl reload nginx
 ```
 
-The example script is harmless: it only logs its start and finish.
+The example script performs a real but small deployment: it renders a status page under `/opt/komodo-gitops-demo-app/public`, creates/updates `komodo-gitops-demo-app.service`, and serves it on TCP port `8082`. The hook verifies `http://127.0.0.1:8082/` before returning success.
 
 ### 3. Docker Compose management
 
