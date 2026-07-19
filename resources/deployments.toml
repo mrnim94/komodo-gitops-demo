@@ -1,0 +1,16 @@
+# Use a Deployment when Komodo should manage one Docker container directly.
+# It is intentionally separate from Docker Compose stacks in stacks.toml.
+[[deployment]]
+name = "demo-nginx-container"
+description = "Single Docker container managed directly by Komodo"
+tags = ["demo", "gitops", "docker"]
+deploy = false
+
+[deployment.config]
+server = "komodo-periphery"
+image.type = "Image"
+image.params.image = "nginx:1.27-alpine"
+network = "bridge"
+restart = "unless-stopped"
+ports = "8081:80"
+labels = "app.kubernetes.io/managed-by=komodo\ndemo=gitops-direct-docker"
