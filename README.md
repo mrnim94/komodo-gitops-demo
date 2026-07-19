@@ -55,8 +55,9 @@ The example script is harmless: it only logs its start and finish.
 ### 3. Docker Compose management
 
 `resources/stacks.toml` declares `demo-nginx`, sourcing
-`nginx-demo/compose.yaml`. The stack has `deploy = true`, so applying that
-Resource Sync will reconcile the Compose application. Do not also run
+`nginx-demo/compose.yaml`. The stack starts with `deploy = false`, so applying that
+Resource Sync creates or updates the Stack definition without immediately
+starting Compose. Use **Deploy** in Komodo when ready. Do not also run
 `docker compose up` from `scripts/deploy.sh`; a Stack must be its only
 deployment owner.
 
