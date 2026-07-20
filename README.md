@@ -102,3 +102,19 @@ PY
 
 docker compose -f nginx-demo/compose.yaml config
 ```
+
+## Automatic path-filtered sync
+
+GitHub Actions is the event router. Each workflow signs a minimal GitHub-style
+push payload and calls its matching Komodo listener; it does not expose webhook
+secrets in the repository. The mappings are:
+
+| Changed path | Workflow | Komodo action |
+| --- | --- | --- |
+| `scripts/**` | `komodo-repo-deploy.yml` | Pull Repo, then run `scripts/deploy.sh` |
+| `resources/deployments.toml` | `komodo-sync-deployments.yml` | Run Docker Deployment sync |
+| `resources/app-repo.toml` | `komodo-sync-automation.yml` | Run server-automation sync |
+| `resources/stacks.toml`, `nginx-demo/**` | `komodo-sync-stacks.yml` | Run Compose Stack sync |
+
+A README-only commit triggers none of these. Each workflow can also be started
+manually from the Actions tab for the `master` branch.
