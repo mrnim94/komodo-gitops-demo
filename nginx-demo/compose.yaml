@@ -1,6 +1,6 @@
 services:
   nginx:
-    image: nginx:1.25-alpine
+    image: nginx:1.24-alpine
     container_name: komodo-demo-nginx
     restart: unless-stopped
     ports:
