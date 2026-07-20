@@ -21,4 +21,4 @@ jobs:
           set -euo pipefail
           body=$(printf '{"ref":"%s"}' "$REF")
           signature="sha256=$(printf '%s' "$body" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" -hex | sed 's/^.* //')"
-          curl --fail-with-body --silent --show-error --retry 3 -X POST "$WEBHOOK_URL" -H 'Content-Type: application/json' -H "X-Hub-Signature-256: $signature" --data "$body"
+          curl -k --fail-with-body --silent --show-error --retry 3 -X POST "$WEBHOOK_URL" -H 'Content-Type: application/json' -H "X-Hub-Signature-256: $signature" --data "$body"
