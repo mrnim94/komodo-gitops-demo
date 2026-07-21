@@ -47,6 +47,22 @@ jobs:
             echo ""
           }
 
+          trigger_stack_deploy() {
+            local stack_name="$1"
+            local url="${KOMODO_HOST}/listener/github/stack/${stack_name}/deploy"
+            local body
+            body=$(printf '{"ref":"refs/heads/%s"}' "$GITHUB_REF_NAME")
+            local sig
+            sig="sha256=$(printf '%s' "$body" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" -hex | sed 's/^.* //')"
+            echo "→ Deploy stack: $stack_name"
+            curl -k --fail-with-body --silent --show-error --retry 3 \
+              -X POST "$url" \
+              -H 'Content-Type: application/json' \
+              -H "X-Hub-Signature-256: $sig" \
+              --data "$body"
+            echo ""
+          }
+
           trigger_repo() {
             local repo_name="$1"
             local url="${KOMODO_HOST}/listener/github/repo/${repo_name}/pull"
@@ -92,6 +108,10 @@ jobs:
             srv=$(basename "$dir")
             if echo "$CHANGED" | grep -q "^stacks/${srv}/"; then
               trigger_sync "sync-${srv}-stacks"
+              # ResourceSync updates definitions; deploy applies compose-file changes.
+              if [ "$srv" = "periphery-181" ]; then
+                trigger_stack_deploy "demo-nginx"
+              fi
             fi
           done
 
