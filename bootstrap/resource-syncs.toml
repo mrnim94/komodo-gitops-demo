@@ -1,6 +1,5 @@
 # Bootstrap: khai báo TẤT CẢ ResourceSync.
-# Tạo THỦ CÔNG 1 ResourceSync "bootstrap" trên Komodo trỏ vào file này.
-# Sau đó mọi sync khác tự được tạo.
+# managed = false → không track deletes, chỉ create/update
 
 # --- Deployments & Repos (servers register via onboarding key, not GitOps) ---
 [[resource_sync]]
@@ -11,6 +10,7 @@ branch = "master"
 git_provider = "github.com"
 resource_path = ["servers/deployments.toml", "servers/repos.toml"]
 webhook_enabled = true
+managed = false
 
 # --- Per-server stacks ---
 [[resource_sync]]
@@ -21,18 +21,9 @@ branch = "master"
 git_provider = "github.com"
 resource_path = ["stacks/periphery-181/stacks.toml"]
 webhook_enabled = true
+managed = false
 
-# Thêm server mới → thêm 1 block:
-# [[resource_sync]]
-# name = "sync-srv02-stacks"
-# [resource_sync.config]
-# repo = "mrnim94/komodo-gitops-demo"
-# branch = "master"
-# git_provider = "github.com"
-# resource_path = ["stacks/srv02/stacks.toml"]
-# webhook_enabled = true
-
-# --- Automation (actions + procedures) ---
+# --- Automation: Actions & Procedures ---
 [[resource_sync]]
 name = "sync-automation"
 [resource_sync.config]
@@ -41,3 +32,4 @@ branch = "master"
 git_provider = "github.com"
 resource_path = ["automation/actions.toml", "automation/procedures.toml"]
 webhook_enabled = true
+managed = false
