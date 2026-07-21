@@ -108,6 +108,9 @@ jobs:
             srv=$(basename "$dir")
             if echo "$CHANGED" | grep -q "^stacks/${srv}/"; then
               trigger_sync "sync-${srv}-stacks"
+              # Listener returns after auth and runs the sync asynchronously.
+              # Wait until ResourceSync has updated Stack metadata before deploy.
+              sleep 5
               # ResourceSync updates definitions; deploy applies compose-file changes.
               if [ "$srv" = "periphery-181" ]; then
                 trigger_stack_deploy "demo-nginx"
