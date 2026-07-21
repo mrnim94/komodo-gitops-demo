@@ -1,0 +1,25 @@
+# Actions: Typescript scripts gọi Komodo API trực tiếp.
+# Demo: kiểm tra tất cả stacks có tag "demo" và log trạng thái.
+
+[[action]]
+name = "demo-check-stacks-status"
+description = "List all stacks tagged 'demo' and log their state"
+tags = ["demo", "gitops"]
+
+[action.config]
+script = """
+const stacks = await komodo.read("ListStacks", {
+  query: { tags: ["demo"] },
+});
+
+if (stacks.length === 0) {
+  console.log("No stacks found with tag 'demo'");
+} else {
+  for (const stack of stacks) {
+    const state = stack.info?.state ?? "Unknown";
+    console.log(`Stack: ${stack.name} | State: ${state}`);
+  }
+}
+
+console.log(`Total: ${stacks.length} stack(s)`);
+"""

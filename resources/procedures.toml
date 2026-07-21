@@ -1,0 +1,19 @@
+# Procedures: chuỗi stages chạy tuần tự, trong mỗi stage các execution chạy song song.
+# Demo: pull repo trước, sau đó deploy stack demo-nginx.
+
+[[procedure]]
+name = "demo-pull-and-deploy"
+description = "Stage 1: pull repo | Stage 2: deploy nginx stack"
+tags = ["demo", "gitops"]
+
+[[procedure.config.stage]]
+name = "Pull Repo"
+executions = [
+  { execution.type = "PullRepo", execution.params.repo = "komodo-gitops-demo-script" },
+]
+
+[[procedure.config.stage]]
+name = "Deploy Stack"
+executions = [
+  { execution.type = "DeployStack", execution.params.stack = "demo-nginx" },
+]
