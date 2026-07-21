@@ -11,20 +11,17 @@ jobs:
   trigger-komodo:
     runs-on: ubuntu-latest
     steps:
-      - name: Compute HMAC signature
-        id: sign
-        env:
-          KOMODO_WEBHOOK_SECRET: ${{ secrets.KOMODO_WEBHOOK_SECRET }}
-        run: |
-          PAYLOAD='{"ref":"refs/heads/master"}'
-          SIG=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$KOMODO_WEBHOOK_SECRET" | sed 's/^.*= //')
-          echo "sig=sha256=$SIG" >> "$GITHUB_OUTPUT"
-          echo "payload=$PAYLOAD" >> "$GITHUB_OUTPUT"
-
       - name: Call Komodo webhook
+        env:
+          WEBHOOK_URL: ${{ secrets.KOMODO_WEBHOOK_URL }}
+          WEBHOOK_SECRET: ${{ secrets.KOMODO_WEBHOOK_SECRET }}
+          REF: refs/heads/master
         run: |
-          curl -fsSLk -X POST \
-            -H "Content-Type: application/json" \
-            -H "X-Hub-Signature-256: ${{ steps.sign.outputs.sig }}" \
-            -d '${{ steps.sign.outputs.payload }}' \
-            "${{ secrets.KOMODO_WEBHOOK_URL }}"
+          set -euo pipefail
+          body=$(printf '{"ref":"%s"}' "$REF")
+          signature="sha256=$(printf '%s' "$body" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" -hex | sed 's/^.* //')"
+          curl -k --fail-with-body --silent --show-error --retry 3 \
+            -X POST "$WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -H "X-Hub-Signature-256: $signature" \
+            --data "$body"
