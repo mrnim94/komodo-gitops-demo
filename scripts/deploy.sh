@@ -29,7 +29,7 @@ cat > "${WEB_ROOT}/index.html" <<HTML
 <style>body{font-family:system-ui,sans-serif;max-width:720px;margin:4rem auto;padding:0 1rem;background:#111827;color:#e5e7eb}main{border:1px solid #374151;border-radius:12px;padding:2rem}code{color:#86efac}small{color:#9ca3af}</style></head>
 <body><main><h1>Komodo GitOps Repo hook works ✅</h1><p>This page was rendered by <code>scripts/deploy.sh</code>, then published by a systemd service.</p>
 <ul><li>Host: <code>${hostname}</code></li><li>Git commit: <code>${commit}</code></li><li>Deployed UTC: <code>${deployed_at}</code></li></ul>
-<small>Managed by Komodo Resource: komodo-gitops-demo-script-ahehe</small></main></body></html>
+<small>Managed by Komodo Resource: komodo-gitops-demo-script-ahaha</small></main></body></html>
 HTML
 
 cat > "/etc/systemd/system/${SERVICE}" <<UNIT
