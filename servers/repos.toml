@@ -1,5 +1,6 @@
-# Use a Repo when you need to clone source code and run arbitrary commands.
-# This resource does not manage the nginx-demo Compose application.
+# Repo resources: clone source code và chạy arbitrary commands.
+# Dùng cho automation, migration, script hooks.
+
 [[repo]]
 name = "komodo-gitops-demo-script"
 description = "Run repository automation after clone or pull"
@@ -11,13 +12,11 @@ git_provider = "github.com"
 repo = "mrnim94/komodo-gitops-demo"
 branch = "master"
 
-# Run once after the initial clone.
 on_clone.path = "."
 on_clone.command = """
 bash scripts/deploy.sh
 """
 
-# Run again whenever Komodo pulls new commits.
 on_pull.path = "."
 on_pull.command = """
 bash scripts/deploy.sh

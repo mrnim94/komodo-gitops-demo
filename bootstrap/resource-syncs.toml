@@ -1,0 +1,43 @@
+# Bootstrap: khai báo TẤT CẢ ResourceSync.
+# Tạo THỦ CÔNG 1 ResourceSync "bootstrap" trên Komodo trỏ vào file này.
+# Sau đó mọi sync khác tự được tạo.
+
+# --- Servers & Deployments & Repos ---
+[[resource_sync]]
+name = "sync-servers"
+[resource_sync.config]
+repo = "mrnim94/komodo-gitops-demo"
+branch = "master"
+git_provider = "github.com"
+resource_path = ["servers/servers.toml", "servers/deployments.toml", "servers/repos.toml"]
+webhook_enabled = true
+
+# --- Per-server stacks ---
+[[resource_sync]]
+name = "sync-komodo-periphery-stacks"
+[resource_sync.config]
+repo = "mrnim94/komodo-gitops-demo"
+branch = "master"
+git_provider = "github.com"
+resource_path = ["stacks/komodo-periphery/stacks.toml"]
+webhook_enabled = true
+
+# Thêm server mới → thêm 1 block:
+# [[resource_sync]]
+# name = "sync-srv02-stacks"
+# [resource_sync.config]
+# repo = "mrnim94/komodo-gitops-demo"
+# branch = "master"
+# git_provider = "github.com"
+# resource_path = ["stacks/srv02/stacks.toml"]
+# webhook_enabled = true
+
+# --- Automation (actions + procedures) ---
+[[resource_sync]]
+name = "sync-automation"
+[resource_sync.config]
+repo = "mrnim94/komodo-gitops-demo"
+branch = "master"
+git_provider = "github.com"
+resource_path = ["automation/actions.toml", "automation/procedures.toml"]
+webhook_enabled = true

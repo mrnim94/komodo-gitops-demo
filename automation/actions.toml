@@ -1,5 +1,5 @@
 # Actions: Typescript scripts gọi Komodo API trực tiếp.
-# Demo: kiểm tra tất cả stacks có tag "demo" và log trạng thái.
+# Dùng khi cần logic phức tạp: điều kiện, vòng lặp, API calls.
 
 [[action]]
 name = "demo-check-stacks-status"

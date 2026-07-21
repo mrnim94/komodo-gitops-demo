@@ -1,0 +1,19 @@
+# Khai báo tất cả Komodo servers.
+# Mỗi server cần chạy komodo-periphery agent.
+# Demo: chỉ có 1 server komodo-periphery hiện tại.
+
+[[server]]
+name = "komodo-periphery"
+description = "Demo physical server running Komodo Periphery agent"
+tags = ["demo"]
+[server.config]
+address = "http://192.168.101.36:8120"
+enabled = true
+
+# Thêm server mới:
+# [[server]]
+# name = "srv02"
+# tags = ["prod"]
+# [server.config]
+# address = "http://192.168.1.12:8120"
+# enabled = true

@@ -1,120 +1,132 @@
-# Komodo GitOps demo
+# Komodo GitOps Demo
 
-A small, safe reference repository for declaring Docker resources in
-[Komodo](https://komo.do/). It separates the three common operations so a
-resource has exactly one owner.
+Full GitOps automation for managing Docker Compose stacks across multiple
+physical servers using [Komodo](https://komo.do/).
 
 ## Architecture
 
 ```text
-GitHub repository (master)
-        │
-        ├─ GitOps · Docker deployments ────── resources/deployments.toml
-        ├─ GitOps · Server automation ─────── resources/app-repo.toml
-        └─ GitOps · Docker Compose stacks ─── resources/stacks.toml
-                                              │
-                                              ▼
-                              Komodo Core → komodo-periphery
+GitHub push
+     ↓
+GitHub Actions (1 workflow, path-based detection)
+     ↓
+Komodo webhook → ResourceSync diff → create/update/deploy
+     ↓
+komodo-periphery agents on physical servers
 ```
 
-The three Resource Syncs are intentionally independent. Each one reads one
-TOML file, so the review / apply screen shows only changes for that management
-mode.
+## Repository structure
 
-| Goal | Komodo resource | GitOps TOML | Result |
-| --- | --- | --- | --- |
-| Manage a single Docker container | `Deployment` | `resources/deployments.toml` | Komodo owns `docker run`, lifecycle, logs and image updates. |
-| Run arbitrary server automation | `Repo` | `resources/app-repo.toml` | Komodo clones/pulls the repo and runs hooks such as shell scripts, package updates or migrations. |
-| Manage a Compose application | `Stack` | `resources/stacks.toml` | Komodo owns `docker compose` lifecycle, service status, logs and updates. |
+```
+├── servers/                          # Server infrastructure
+│   ├── servers.toml                  # All server definitions
+│   ├── deployments.toml              # Direct Docker containers
+│   └── repos.toml                    # Repo clone + script hooks
+│
+├── stacks/                           # Per-server Docker Compose stacks
+│   └── <server-name>/
+│       ├── stacks.toml               # Stack definitions for this server
+│       └── <app-name>/
+│           └── compose.yaml          # Compose file
+│
+├── automation/                       # Komodo orchestration
+│   ├── actions.toml                  # TypeScript API scripts
+│   └── procedures.toml               # Multi-stage pipelines
+│
+├── bootstrap/                        # Self-managing ResourceSyncs
+│   └── resource-syncs.toml           # Declares ALL other syncs
+│
+├── scripts/                          # Server automation scripts
+│   └── deploy.sh
+│
+└── .github/workflows/
+    └── komodo-sync.yml               # Single workflow for everything
+```
 
-## Resource definitions
+## Bootstrap (one-time setup)
 
-### 1. Direct Docker management
+1. Create **one** ResourceSync manually on Komodo:
+   - Name: `bootstrap`
+   - Repo: `mrnim94/komodo-gitops-demo`
+   - Branch: `master`
+   - Resource path: `bootstrap/resource-syncs.toml`
 
-`resources/deployments.toml` declares `demo-nginx-container`, a direct Komodo
-Deployment using `nginx:1.27-alpine` on host port `8081`.
+2. Run Sync → Komodo creates all other ResourceSyncs automatically.
 
-It starts with `deploy = false`: applying the Resource Sync only creates or
-updates the Deployment definition. Use **Deploy** in Komodo when ready. This
-avoids accidental conflict with a manually managed container.
+3. Each child ResourceSync syncs its own TOML files → servers, stacks,
+   actions, procedures are all created.
 
-### 2. Arbitrary commands or scripts
+4. Set **2 GitHub Secrets**:
+   - `KOMODO_HOST` — e.g. `https://komodo.nimtechnology.com`
+   - `KOMODO_WEBHOOK_SECRET` — from Komodo Core config
 
-`resources/app-repo.toml` declares `komodo-gitops-demo-script` as a Repo.
-Komodo executes `bash scripts/deploy.sh` after its initial clone and after a
-pull. Put non-Compose work here, for example:
+From this point, everything is automated.
+
+## Day-to-day operations
+
+### Add a new server
+
+1. Add `[[server]]` to `servers/servers.toml`
+2. Create `stacks/<server-name>/stacks.toml` + compose files
+3. Add `[[resource_sync]]` to `bootstrap/resource-syncs.toml`
+4. `git push` → done
+
+### Add a stack to an existing server
+
+1. Add `[[stack]]` to `stacks/<server-name>/stacks.toml`
+2. Add compose file to `stacks/<server-name>/<app>/compose.yaml`
+3. `git push` → sync runs → stack created/deployed
+
+### Update a compose file
+
+1. Edit `stacks/<server-name>/<app>/compose.yaml`
+2. `git push` → Komodo detects change → redeploy
+
+## GitHub Actions
+
+One workflow (`komodo-sync.yml`) handles everything:
+
+| Changed path | Komodo action |
+|---|---|
+| `bootstrap/**` | Sync bootstrap → creates/updates all ResourceSyncs |
+| `servers/**` | Sync servers, deployments, repos |
+| `stacks/<srv>/**` | Sync that server's stacks |
+| `automation/**` | Sync actions + procedures |
+| `scripts/**` | Trigger Repo pull → run deploy.sh |
+
+Only **2 secrets** needed: `KOMODO_HOST` and `KOMODO_WEBHOOK_SECRET`.
+
+## Scaling to 10+ servers
+
+```toml
+# bootstrap/resource-syncs.toml — just add blocks:
+
+[[resource_sync]]
+name = "sync-srv05-stacks"
+[resource_sync.config]
+repo = "mrnim94/komodo-gitops-demo"
+branch = "master"
+git_provider = "github.com"
+resource_path = ["stacks/srv05/stacks.toml"]
+webhook_enabled = true
+```
+
+The workflow auto-detects server folders — no workflow changes needed.
+
+## Local validation
 
 ```bash
-apt-get update
-./scripts/migrate-database.sh
-systemctl reload nginx
-```
-
-The example script performs a real but small deployment: it renders a status page under `/opt/komodo-gitops-demo-app/public`, creates/updates `komodo-gitops-demo-app.service`, and serves it on TCP port `8082`. The hook verifies `http://127.0.0.1:8082/` before returning success.
-
-### 3. Docker Compose management
-
-`resources/stacks.toml` declares `demo-nginx`, sourcing
-`nginx-demo/compose.yaml`. The stack starts with `deploy = false`, so applying that
-Resource Sync creates or updates the Stack definition without immediately
-starting Compose. Use **Deploy** in Komodo when ready. Do not also run
-`docker compose up` from `scripts/deploy.sh`; a Stack must be its only
-deployment owner.
-
-> The current Compose sample uses container name `komodo-demo-nginx` and host
-> port `8080`. Stop or rename any manually created container with the same name
-> before applying this Stack sync.
-
-## Komodo Core setup
-
-Create these Resource Syncs in Komodo, all sourced from this public GitHub
-repository:
-
-```text
-repo:         mrnim94/komodo-gitops-demo
-branch:       master
-git provider: github.com
-server:       komodo-periphery
-```
-
-| Resource Sync name | Resource path |
-| --- | --- |
-| `GitOps · Docker deployments` | `resources/deployments.toml` |
-| `GitOps · Server automation` | `resources/app-repo.toml` |
-| `GitOps · Docker Compose stacks` | `resources/stacks.toml` |
-
-For every sync: **Refresh** → review the Pending diff → **Run Sync**. This
-repository is public, so no `git_account` is needed. Configure a GitHub account
-in Komodo only after making the repository private.
-
-## Validation locally
-
-```bash
-# Check TOML syntax (Python 3.11+)
-python3 - <<'PY'
+# TOML syntax check
+python3 -c "
 import pathlib, tomllib
-for path in pathlib.Path('resources').glob('*.toml'):
-    tomllib.loads(path.read_text())
-    print(f'OK {path}')
-PY
+for p in sorted(pathlib.Path('.').rglob('*.toml')):
+    tomllib.loads(p.read_text())
+    print(f'OK {p}')
+"
 
-# Validate the Compose application
-
-docker compose -f nginx-demo/compose.yaml config
+# Compose validation
+for f in stacks/*/*/compose.yaml; do
+  echo "--- $f ---"
+  docker compose -f "$f" config --quiet && echo "OK"
+done
 ```
-
-## Automatic path-filtered sync
-
-GitHub Actions is the event router. Each workflow signs a minimal GitHub-style
-push payload and calls its matching Komodo listener; it does not expose webhook
-secrets in the repository. The mappings are:
-
-| Changed path | Workflow | Komodo action |
-| --- | --- | --- |
-| `scripts/**` | `komodo-repo-deploy.yml` | Pull Repo, then run `scripts/deploy.sh` |
-| `resources/deployments.toml` | `komodo-sync-deployments.yml` | Run Docker Deployment sync |
-| `resources/app-repo.toml` | `komodo-sync-automation.yml` | Run server-automation sync |
-| `resources/stacks.toml`, `nginx-demo/**` | `komodo-sync-stacks.yml` | Run Compose Stack sync |
-
-A README-only commit triggers none of these. Each workflow can also be started
-manually from the Actions tab for the `master` branch.

@@ -1,0 +1,105 @@
+name: Komodo GitOps Sync
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'servers/**'
+      - 'stacks/**'
+      - 'automation/**'
+      - 'bootstrap/**'
+      - 'scripts/**'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed paths and trigger Komodo webhooks
+        env:
+          KOMODO_HOST: ${{ secrets.KOMODO_HOST }}
+          WEBHOOK_SECRET: ${{ secrets.KOMODO_WEBHOOK_SECRET }}
+        run: |
+          set -euo pipefail
+
+          trigger_sync() {
+            local sync_name="$1"
+            local url="${KOMODO_HOST}/listener/github/sync/${sync_name}/sync"
+            local body
+            body=$(printf '{"ref":"refs/heads/%s"}' "$GITHUB_REF_NAME")
+            local sig
+            sig="sha256=$(printf '%s' "$body" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" -hex | sed 's/^.* //')"
+            echo "→ Sync: $sync_name"
+            curl -k --fail-with-body --silent --show-error --retry 3 \
+              -X POST "$url" \
+              -H 'Content-Type: application/json' \
+              -H "X-Hub-Signature-256: $sig" \
+              --data "$body" || echo "  ⚠ failed (sync may not exist yet)"
+            echo ""
+          }
+
+          trigger_repo() {
+            local repo_name="$1"
+            local url="${KOMODO_HOST}/listener/github/repo/${repo_name}/pull"
+            local body
+            body=$(printf '{"ref":"refs/heads/%s"}' "$GITHUB_REF_NAME")
+            local sig
+            sig="sha256=$(printf '%s' "$body" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" -hex | sed 's/^.* //')"
+            echo "→ Repo pull: $repo_name"
+            curl -k --fail-with-body --silent --show-error --retry 3 \
+              -X POST "$url" \
+              -H 'Content-Type: application/json' \
+              -H "X-Hub-Signature-256: $sig" \
+              --data "$body" || echo "  ⚠ failed"
+            echo ""
+          }
+
+          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only HEAD)
+
+          echo "Changed files:"
+          echo "$CHANGED"
+          echo "---"
+
+          # Bootstrap — creates/updates all other ResourceSyncs
+          if echo "$CHANGED" | grep -q '^bootstrap/'; then
+            trigger_sync "bootstrap"
+            # After bootstrap sync, trigger all child syncs
+            sleep 3
+            trigger_sync "sync-servers"
+            for dir in stacks/*/; do
+              srv=$(basename "$dir")
+              trigger_sync "sync-${srv}-stacks"
+            done
+            trigger_sync "sync-automation"
+          fi
+
+          # Servers, deployments, repos
+          if echo "$CHANGED" | grep -q '^servers/'; then
+            trigger_sync "sync-servers"
+          fi
+
+          # Per-server stacks — detect which server folder changed
+          for dir in stacks/*/; do
+            srv=$(basename "$dir")
+            if echo "$CHANGED" | grep -q "^stacks/${srv}/"; then
+              trigger_sync "sync-${srv}-stacks"
+            fi
+          done
+
+          # Automation (actions + procedures)
+          if echo "$CHANGED" | grep -q '^automation/'; then
+            trigger_sync "sync-automation"
+          fi
+
+          # Scripts → trigger Komodo Repo pull
+          if echo "$CHANGED" | grep -q '^scripts/'; then
+            trigger_repo "komodo-gitops-demo-script"
+          fi
+
+          echo "✅ Done."

@@ -1,0 +1,27 @@
+# Docker Compose stacks cho server komodo-periphery.
+# Mỗi [[stack]] trỏ đến 1 compose file trong cùng folder server.
+
+[[stack]]
+name = "demo-nginx"
+description = "Nginx Docker Compose application managed by Komodo"
+tags = ["demo", "gitops", "komodo-periphery"]
+deploy = false
+
+[stack.config]
+server = "komodo-periphery"
+repo = "mrnim94/komodo-gitops-demo"
+branch = "master"
+git_provider = "github.com"
+file_paths = ["stacks/komodo-periphery/nginx-demo/compose.yaml"]
+
+# Thêm stack mới trên server này:
+# [[stack]]
+# name = "komodo-periphery-monitoring"
+# tags = ["prod", "komodo-periphery"]
+# deploy = true
+# [stack.config]
+# server = "komodo-periphery"
+# repo = "mrnim94/komodo-gitops-demo"
+# branch = "master"
+# git_provider = "github.com"
+# file_paths = ["stacks/komodo-periphery/monitoring/compose.yaml"]

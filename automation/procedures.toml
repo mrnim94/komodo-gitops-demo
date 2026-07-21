@@ -1,5 +1,5 @@
-# Procedures: chuỗi stages chạy tuần tự, trong mỗi stage các execution chạy song song.
-# Demo: pull repo trước, sau đó deploy stack demo-nginx.
+# Procedures: chuỗi stages tuần tự, mỗi stage chạy song song.
+# Dùng cho CI/CD pipeline đơn giản.
 
 [[procedure]]
 name = "demo-pull-and-deploy"

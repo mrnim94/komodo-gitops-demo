@@ -1,9 +1,10 @@
-# Use a Deployment when Komodo should manage one Docker container directly.
-# It is intentionally separate from Docker Compose stacks in stacks.toml.
+# Deployments: quản lý Docker container trực tiếp (không qua Compose).
+# Mỗi [[deployment]] gắn với 1 server cụ thể.
+
 [[deployment]]
 name = "demo-nginx-container"
 description = "Single Docker container managed directly by Komodo"
-tags = ["demo", "gitops", "docker"]
+tags = ["demo", "gitops", "komodo-periphery"]
 deploy = false
 
 [deployment.config]
