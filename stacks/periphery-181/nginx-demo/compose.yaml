@@ -8,4 +8,4 @@ services:
     labels:
       app.kubernetes.io/managed-by: komodo
       demo: gitops
-      komodo.gitops.probe: "2026-07-21T18:15:00Z"
+      komodo.gitops.probe: "2026-07-21T18:18:00Z"
