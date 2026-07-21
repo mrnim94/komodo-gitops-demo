@@ -2,14 +2,14 @@
 # Tạo THỦ CÔNG 1 ResourceSync "bootstrap" trên Komodo trỏ vào file này.
 # Sau đó mọi sync khác tự được tạo.
 
-# --- Servers & Deployments & Repos ---
+# --- Deployments & Repos (servers register via onboarding key, not GitOps) ---
 [[resource_sync]]
-name = "sync-servers"
+name = "sync-server-resources"
 [resource_sync.config]
 repo = "mrnim94/komodo-gitops-demo"
 branch = "master"
 git_provider = "github.com"
-resource_path = ["servers/servers.toml", "servers/deployments.toml", "servers/repos.toml"]
+resource_path = ["servers/deployments.toml", "servers/repos.toml"]
 webhook_enabled = true
 
 # --- Per-server stacks ---

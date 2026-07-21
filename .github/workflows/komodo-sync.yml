@@ -79,9 +79,9 @@ jobs:
             trigger_sync "sync-automation"
           fi
 
-          # Servers, deployments, repos
+          # Deployments, repos (servers register via onboarding key)
           if echo "$CHANGED" | grep -q '^servers/'; then
-            trigger_sync "sync-servers"
+            trigger_sync "sync-server-resources"
           fi
 
           # Per-server stacks — detect which server folder changed

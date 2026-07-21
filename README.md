@@ -18,10 +18,10 @@ komodo-periphery agents on physical servers
 ## Repository structure
 
 ```
-├── servers/                          # Server infrastructure
-│   ├── servers.toml                  # All server definitions
+├── servers/                          # Server-bound resources
 │   ├── deployments.toml              # Direct Docker containers
 │   └── repos.toml                    # Repo clone + script hooks
+│   # NOTE: servers register via onboarding key, not GitOps
 │
 ├── stacks/                           # Per-server Docker Compose stacks
 │   └── <server-name>/
@@ -66,7 +66,7 @@ From this point, everything is automated.
 
 ### Add a new server
 
-1. Add `[[server]]` to `servers/servers.toml`
+1. Register the server via Komodo onboarding key (Periphery → Core)
 2. Create `stacks/<server-name>/stacks.toml` + compose files
 3. Add `[[resource_sync]]` to `bootstrap/resource-syncs.toml`
 4. `git push` → done
@@ -89,7 +89,7 @@ One workflow (`komodo-sync.yml`) handles everything:
 | Changed path | Komodo action |
 |---|---|
 | `bootstrap/**` | Sync bootstrap → creates/updates all ResourceSyncs |
-| `servers/**` | Sync servers, deployments, repos |
+| `servers/**` | Sync deployments + repos |
 | `stacks/<srv>/**` | Sync that server's stacks |
 | `automation/**` | Sync actions + procedures |
 | `scripts/**` | Trigger Repo pull → run deploy.sh |
