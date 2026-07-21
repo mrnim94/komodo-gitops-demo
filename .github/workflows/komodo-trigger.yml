@@ -1,0 +1,30 @@
+name: Trigger Komodo Webhook on deploy.sh change
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'scripts/deploy.sh'
+
+jobs:
+  trigger-komodo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compute HMAC signature
+        id: sign
+        env:
+          KOMODO_WEBHOOK_SECRET: ${{ secrets.KOMODO_WEBHOOK_SECRET }}
+        run: |
+          PAYLOAD='{"ref":"refs/heads/master"}'
+          SIG=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$KOMODO_WEBHOOK_SECRET" | sed 's/^.*= //')
+          echo "sig=sha256=$SIG" >> "$GITHUB_OUTPUT"
+          echo "payload=$PAYLOAD" >> "$GITHUB_OUTPUT"
+
+      - name: Call Komodo webhook
+        run: |
+          curl -fsSL -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-Hub-Signature-256: ${{ steps.sign.outputs.sig }}" \
+            -d '${{ steps.sign.outputs.payload }}' \
+            "${{ secrets.KOMODO_WEBHOOK_URL }}"
