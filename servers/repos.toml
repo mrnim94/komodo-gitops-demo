@@ -7,7 +7,7 @@ description = "Run repository automation after clone or pull"
 tags = ["gitops", "demo"]
 
 [repo.config]
-server = "komodo-periphery"
+server = "periphery-181"
 git_provider = "github.com"
 repo = "mrnim94/komodo-gitops-demo"
 branch = "master"

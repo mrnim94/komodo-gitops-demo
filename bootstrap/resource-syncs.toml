@@ -14,12 +14,12 @@ webhook_enabled = true
 
 # --- Per-server stacks ---
 [[resource_sync]]
-name = "sync-komodo-periphery-stacks"
+name = "sync-periphery-181-stacks"
 [resource_sync.config]
 repo = "mrnim94/komodo-gitops-demo"
 branch = "master"
 git_provider = "github.com"
-resource_path = ["stacks/komodo-periphery/stacks.toml"]
+resource_path = ["stacks/periphery-181/stacks.toml"]
 webhook_enabled = true
 
 # Thêm server mới → thêm 1 block:
