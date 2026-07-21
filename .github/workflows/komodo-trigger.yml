@@ -23,7 +23,7 @@ jobs:
 
       - name: Call Komodo webhook
         run: |
-          curl -fsSL -X POST \
+          curl -fsSLk -X POST \
             -H "Content-Type: application/json" \
             -H "X-Hub-Signature-256: ${{ steps.sign.outputs.sig }}" \
             -d '${{ steps.sign.outputs.payload }}' \
