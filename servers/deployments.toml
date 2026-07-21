@@ -5,7 +5,7 @@
 name = "demo-nginx-container"
 description = "Single Docker container managed directly by Komodo"
 tags = ["demo", "gitops", "komodo-periphery"]
-deploy = false
+deploy = true
 
 [deployment.config]
 server = "periphery-181"

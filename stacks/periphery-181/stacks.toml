@@ -5,7 +5,7 @@
 name = "demo-nginx"
 description = "Nginx Docker Compose application managed by Komodo"
 tags = ["demo", "gitops", "komodo-periphery"]
-deploy = false
+deploy = true
 
 [stack.config]
 server = "periphery-181"
